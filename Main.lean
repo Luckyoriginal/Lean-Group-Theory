@@ -24,4 +24,11 @@ theorem left_cancel {G : Type} [Group G] (a b c : G) (h : mul c a = mul c b) : a
   rw [inv_mul]
   rw [one_mul]
 
+theorem unique_inv {G : Type} [Group G] (a x : G) (h : mul x a = one) : x= inv a := by
+  rw [<- mul_one x ]
+  rw [<- mul_inv a]
+  rw [<- mul_assoc]
+  rw [h]
+  rw [one_mul]
+
 
