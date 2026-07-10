@@ -34,4 +34,17 @@ theorem unique_inv {G : Type} [Group G] (a x : G) (h : x * a = e) : x= a⁻¹  :
   rw [h]
   rw [one_mul]
 
+theorem inv_inv {G : Type} [Group G] (a : G) : (a⁻¹)⁻¹ = a := by
+  rw [<- mul_one (a⁻¹)⁻¹ ]
+  rw [<- inv_mul a]
+  rw [<- mul_assoc]
+  rw [ inv_mul]
+  rw [one_mul]
+
+theorem ue_id {G : Type} [Group G] ( x a : G) (h: x * a = a): x = e := by
+  rw [<- mul_one x]
+  rw [<- mul_inv a]
+  rw [<- mul_assoc]
+  rw [h]
+
 
