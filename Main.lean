@@ -47,4 +47,60 @@ theorem ue_id {G : Type} [Group G] ( x a : G) (h: x * a = a): x = e := by
   rw [<- mul_assoc]
   rw [h]
 
+-- Group Homomorphism and Sub Group
+structure GroupHom (G H : Type) [Group G] [Group H] where
+  toFun : G -> H
 
+  map_mul : ∀ a b : G, toFun (a * b) = toFun a * toFun b
+
+-- use just as function f a instead of f.toFun a
+instance {G H : Type} [Group G] [Group H] : CoeFun (GroupHom G H) (fun _ => G -> H) where coe f := f.toFun
+
+theorem hom_id {G H : Type} [Group G] [Group H] (f : GroupHom G H) : f e = e := by
+  apply ue_id (f e) (f e)
+  rw [<- f.map_mul]
+  rw [mul_one e]
+
+theorem hom_inv {G H : Type} [Group G] [Group H] (f: GroupHom G H) (a : G) : f (a⁻¹) = (f a)⁻¹ := by
+  apply unique_inv (f a) (f (a⁻¹))
+  rw [<- f.map_mul]
+  rw [inv_mul]
+  rw [hom_id]
+
+structure SubGroup (G : Type) [Group G] where
+  -- function return true if an element of the subgroup
+  carrier : G -> Prop
+
+  -- Property
+  one_mem : carrier e
+  mul_mem : ∀ {a b :G}, carrier a -> carrier b -> carrier (a * b)
+  inv_mem : ∀ {a : G}, carrier a -> carrier a⁻¹ 
+
+theorem subgroup_test {G : Type} [Group G] (H : SubGroup G) (a b : G) (ha: H.carrier a) (hb : H.carrier b) : H.carrier (a * b⁻¹ ) := by
+  exact H.mul_mem ha (H.inv_mem hb)
+
+def kernel { G H : Type} [ Group G] [ Group H] ( f: GroupHom G H) : SubGroup G where
+  carrier := fun x => f x = e
+  
+  one_mem := by
+    exact hom_id f
+  
+  mul_mem := by
+    intro a
+    intro b
+    intro ha
+    intro hb
+    rw [f.map_mul]
+    rw [ha]
+    rw [hb]
+    rw [one_mul]
+  
+  inv_mem := by
+    intro a 
+    intro ha
+    apply ue_id (f a⁻¹) (f a)
+    rw [hom_inv]
+    rw [inv_mul]
+    rw [ha]
+
+    
