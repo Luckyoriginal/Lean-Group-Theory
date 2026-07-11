@@ -145,4 +145,54 @@ theorem coset_trans {G : Type} [Group G] (N : SubGroup G) (a b c : G) (h1 : cose
   rw [<- mul_inv b]
   rw [<- mul_assoc]
   rw [mul_assoc]
+  exact N.mul_mem h1 h2
 
+def coset_setoid {G : Type} [Group G] (N : SubGroup G) : Setoid G where 
+  r := coset_rel N
+  iseqv := {
+    refl := coset_refl N
+    symm := coset_symm N _ _ 
+    trans := coset_trans N _ _ _
+  }
+
+def QuotGroup { G : Type} [ Group G] (N : SubGroup G) := Quotient (coset_setoid N)
+
+class NormalGroup {G : Type} [Group G] (N : SubGroup G) where
+  conj_mem : ∀ (n g : G), N.carrier n -> N.carrier ( g * n * g⁻¹ )
+
+theorem mul_well_defined {G : Type} [Group G] (N : SubGroup G) [NormalGroup N]
+  (a b c d : G) (h1 : coset_rel N a c ) (h2 : coset_rel N b d) : 
+  coset_rel N (a*b) (c*d) := by
+    unfold coset_rel at *
+    rw [mul_inv_rev]
+    rw [<- mul_one c]
+    rw [<- mul_inv b]
+    rw [<- mul_assoc]
+    rw [<- mul_assoc]
+    rw [<- mul_assoc]
+    rw [mul_assoc]
+    have h_conj := NormalGroup.conj_mem (a⁻¹ * c) b⁻¹ h1
+    rw [inv_inv] at h_conj
+    rw [<- mul_assoc] at h_conj
+    exact N.mul_mem h_conj h2
+
+--isomorphism
+structure MulEquiv (G H :Type ) [Group G] [Group H] where
+  toFun : G->H
+  invFun: H->G
+
+  left_inv: ∀ x : G, invFun (toFun x) = x
+  right_inv: ∀ y : H, toFun (invFun y) = y
+
+  map_mul: ∀ a b : G, toFun (a * b) = toFun a * toFun b
+
+--macro
+instance {G H :Type} [Group G] [Group H] : CoeFun (MulEquiv G H) (fun _ => G -> H) where coe f := f.toFun
+
+theorem inv_map_mul {G H : Type} [Group G] [Group H] (f : MulEquiv G H) (a b :H) : f.invFun (a*b) = f.invFun a * f.invFun b := by
+  rw [<- f.right_inv a]
+  rw [<- f.right_inv b]
+  rw [<- f.map_mul]
+  rw [f.left_inv]
+  rw [f.right_inv]
+  rw [f.right_inv]
