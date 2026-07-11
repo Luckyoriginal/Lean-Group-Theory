@@ -103,4 +103,46 @@ def kernel { G H : Type} [ Group G] [ Group H] ( f: GroupHom G H) : SubGroup G w
     rw [inv_mul]
     rw [ha]
 
-    
+-- Normal SUbGroup
+class Normal { G : Type} [Group G] (N : SubGroup G) where
+  conj_mem : ∀ ( n g : G), N.carrier n -> N.carrier (g * n * g⁻¹ )
+
+-- Relation:
+def coset_rel {G : Type} [Group G] (N : SubGroup G) (a b : G) : Prop := 
+  N.carrier (a⁻¹ * b)
+
+theorem coset_refl {G : Type} [Group G] (N : SubGroup G) (a : G) : coset_rel N a a := by
+  unfold coset_rel
+  rw [inv_mul]
+  exact N.one_mem
+
+theorem _mul_inv_rev_ {G : Type} [Group G] (a b : G) : (a*b)*(b⁻¹* a⁻¹ ) = e := by
+  rw [<-mul_assoc]
+  apply ue_id (a*b*b⁻¹*a⁻¹) a
+  rw [mul_assoc]
+  rw [inv_mul]
+  rw [mul_one]
+  rw [mul_assoc]
+  rw [mul_inv]
+  rw [mul_one]
+
+theorem mul_inv_rev {G : Type} [Group G] (a b : G) : (a *b)⁻¹ = b⁻¹ * a⁻¹ := by
+  rw [<-mul_one (a*b)⁻¹]
+  rw [<-_mul_inv_rev_ a b]
+  rw [<-mul_assoc]
+  rw [inv_mul]
+  rw [one_mul]
+
+theorem coset_symm {G : Type} [Group G] (N : SubGroup G) (a b : G)(h : coset_rel N a b) : coset_rel N b a := by
+  unfold coset_rel
+  rw [<- inv_inv a]
+  rw [<-mul_inv_rev a⁻¹ b]
+  apply N.inv_mem h
+
+theorem coset_trans {G : Type} [Group G] (N : SubGroup G) (a b c : G) (h1 : coset_rel N a b) (h2 : coset_rel N b c) : coset_rel N a c := by
+  unfold coset_rel 
+  rw [<- mul_one (a⁻¹)]
+  rw [<- mul_inv b]
+  rw [<- mul_assoc]
+  rw [mul_assoc]
+
