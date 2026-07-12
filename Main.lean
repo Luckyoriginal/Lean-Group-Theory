@@ -196,3 +196,43 @@ theorem inv_map_mul {G H : Type} [Group G] [Group H] (f : MulEquiv G H) (a b :H)
   rw [f.left_inv]
   rw [f.right_inv]
   rw [f.right_inv]
+
+--finite group
+class Fintype (G : Type) where
+  elems: List G
+  complete : ∀ (x : G), x∈ elems
+  no_dup : elems.Nodup 
+
+def group_order (G : Type) [Group G] [Fintype G] : Nat :=
+  (Fintype.elems: List G).length
+
+def gpow {G : Type} [Group G] (a : G) : Nat -> G
+  | 0 => e
+  | n+1 => a*gpow a n
+
+instance {G : Type} [Group G] : HPow G Nat G where
+  hPow a n := gpow a n
+
+def coset_set {G : Type} [Group G] (N : SubGroup G) (g : G) : G -> Prop := fun x => coset_rel N g x
+
+theorem coset_map_injective {G : Type} [Group G] (N : SubGroup G) (g: G) (n1 n2 : G) (h1: N.carrier n1) (h2: N.carrier n2) (heq : g * n1 = g * n2) : n1 = n2 := by
+    apply left_cancel  n1 n2 g 
+    rw [heq]
+
+
+theorem gpow_succ_right {G : Type} [Group G] (a : G) (n : Nat) : 
+  a ^ (n + 1) = a ^ n * a := by
+  
+  induction n with
+  | zero =>
+
+    change a* e = e * a
+    rw [one_mul] 
+    rw [mul_one]
+    
+  | succ k ih =>
+    change a * a ^ (k + 1) = (a * a ^ k) * a
+    
+    rw [ih]
+    
+    rw [← mul_assoc]
